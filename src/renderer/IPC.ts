@@ -11,6 +11,15 @@ export default class IPC {
     public static onConfigUpdated: (config: InstallerConfig) => void
         = () => null;
 
+    public static onAutoInstallDownloadPercent: (percent: number) => void
+        = () => null;
+
+    public static onInstallComplete: () => void
+        = () => null;
+
+    public static onUninstallComplete: () => void
+        = () => null;
+
     public static browseForGamePath() {
         ipcRenderer.send("browse-game-path");
     }
@@ -21,6 +30,18 @@ export default class IPC {
 
     public static saveConfig(config: InstallerConfig) {
         ipcRenderer.send("save-config", config);
+    }
+
+    public static installManual(gamePath: string, zipPath: string) {
+        ipcRenderer.send("install-manual", gamePath, zipPath);
+    }
+
+    public static installAuto(gamePath: string, mlVersion: string, arch: string) {
+        ipcRenderer.send("install-auto", gamePath, mlVersion, arch);
+    }
+
+    public static uninstall(gamePath: string) {
+        ipcRenderer.send("uninstall", gamePath);
     }
 
     public static changeAndSaveConfig(modifier: (config: InstallerConfig) => void, config: InstallerConfig) {
@@ -42,4 +63,16 @@ ipcRenderer.on("zip-path-changed", (event: IpcRendererEvent, path: string) => {
 
 ipcRenderer.on("config-updated", (event: IpcRendererEvent, config: InstallerConfig) => {
     IPC.onConfigUpdated(config);
-})
+});
+
+ipcRenderer.on("auto-install-download-percent", (event: IpcRendererEvent, percent: number) => {
+    IPC.onAutoInstallDownloadPercent(percent);
+});
+
+ipcRenderer.on("install-complete", (event: IpcRendererEvent) => {
+    IPC.onInstallComplete();
+});
+
+ipcRenderer.on("uninstall-complete", (event: IpcRendererEvent) => {
+    IPC.onUninstallComplete();
+});

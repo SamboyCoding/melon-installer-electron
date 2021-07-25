@@ -34,9 +34,9 @@ export default class SettingsTab extends Vue {
     @Prop()
     public config: InstallerConfig;
 
-    get theme(): number {
+    get theme(): string {
         // return this.config.Theme;
-        return 0; //Dark
+        return "0"; //Dark
     }
 
     set theme(value: string) {

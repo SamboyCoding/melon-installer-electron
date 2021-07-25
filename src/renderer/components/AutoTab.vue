@@ -26,9 +26,10 @@
             <custom-checkbox :checked="useAutoArch" label="Auto-Detect" @toggled="toggleAutoArch()"></custom-checkbox>
         </div>
         <div class="row grow" id="install-buttons">
-            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall">UPDATE</button>
-            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall">UN-INSTALL</button>
-            <button class="install-button" v-if="!alreadyInstalled" :disabled="cannotInstall">INSTALL</button>
+            <progress-bar v-if="currentlyInstalling" :percent="installPercent"></progress-bar>
+            <button class="install-button" v-if="alreadyInstalled && !currentlyInstalling" :disabled="cannotInstall" @click="install()">UPDATE</button>
+            <button class="install-button" v-if="alreadyInstalled && !currentlyInstalling" :disabled="cannotInstall" @click="uninstall()">UN-INSTALL</button>
+            <button class="install-button" v-if="!alreadyInstalled && !currentlyInstalling" :disabled="cannotInstall" @click="install()">INSTALL</button>
         </div>
     </div>
 </template>
@@ -39,9 +40,10 @@ import CustomCheckbox from "./CustomCheckbox.vue";
 import IPC from "../IPC";
 import axios from "axios";
 import InstallerConfig from "../../common/InstallerConfig";
+import ProgressBar from "./ProgressBar.vue";
 
 @Component({
-    components: {CustomCheckbox}
+    components: {ProgressBar, CustomCheckbox}
 })
 export default class AutoTab extends Vue {
     @Prop({
@@ -62,6 +64,9 @@ export default class AutoTab extends Vue {
     //Fetched from web
     public mlVersions: any[] = [];
 
+    public currentlyInstalling: boolean = false;
+    public installPercent: number = 0;
+
     public async mounted() {
         IPC.onGamePathChanged = (newPath, newAlreadyInstalled, arch) => {
             console.info(`[Auto] Received new game path ${newPath}, is installed: ${newAlreadyInstalled}, arch: ${arch}`);
@@ -70,15 +75,41 @@ export default class AutoTab extends Vue {
             this.gameIs64Bit = arch == "x64";
 
             this.modifyAndSaveConfig(config => config.LastSelectedGamePath = this.gamePath);
+        };
+
+        IPC.onAutoInstallDownloadPercent = (percent) => {
+            this.installPercent = percent * 0.9; //Cap to 90% to leave room for installing.
+        };
+
+        IPC.onInstallComplete = () => {
+            alert("INSTALL was successful!");
+            this.currentlyInstalling = false;
+            this.installPercent = 0;
+            this.alreadyInstalled = true;
+
+            if(this.config.CloseAfterCompletion)
+                window.close();
+        };
+
+        IPC.onUninstallComplete = () => {
+            this.alreadyInstalled = false;
+            alert("UNINSTALL was successful!");
+        };
+
+        await this.refreshReleases();
+    }
+
+    private async refreshReleases() {
+        if(!this.config) {
+            setTimeout(this.refreshReleases, 200);
+            return;
         }
 
-        return;
-
         try {
-            const response = await axios.get(`https://api.github.com/repos/lavagang/melonloader/releases?${Date.now()}`);
+            const response = await axios.get(`https://api.github.com/repos/lavagang/melonloader/releases`);
             let versions = response.data as any[];
 
-            if (!this.showPreRelease)
+            if (!this.config.ShowAlphaPreReleases)
                 versions = versions.filter(v => v.prerelease === false);
 
             this.mlVersions = versions;
@@ -104,6 +135,15 @@ export default class AutoTab extends Vue {
 
         if (this.useLatest)
             this.selectedVersion = this.mlVersions[0].tag_name;
+    }
+
+    public install() {
+        this.currentlyInstalling = true;
+        IPC.installAuto(this.gamePath, this.selectedVersion, this.selectedArch);
+    }
+
+    public uninstall() {
+        IPC.uninstall(this.gamePath);
     }
 
     get cannotInstall(): boolean {
@@ -153,7 +193,7 @@ export default class AutoTab extends Vue {
         button {
             height: 100%;
 
-            & {
+            &:not(:last-of-type) {
                 margin-right: 6px;
             }
         }

@@ -21,9 +21,10 @@ import SettingsTab from "./components/SettingsTab.vue";
 import ManualTab from "./components/ManualTab.vue";
 import IPC from "./IPC";
 import InstallerConfig from "../common/InstallerConfig";
+import DevTab from "./components/DevTab.vue";
 
 @Component({
-    components: {WindowBar, TabBar, AutoTab, ManualTab, SettingsTab},
+    components: {WindowBar, TabBar, AutoTab, ManualTab, SettingsTab, DevTab},
 })
 export default class App extends Vue {
     public selectedTab = 'auto';
@@ -81,7 +82,7 @@ html, body, #app {
 
             & > div {
                 flex-grow: 1;
-                width: 100%;
+                width: calc(100% - 8px);
             }
         }
     }

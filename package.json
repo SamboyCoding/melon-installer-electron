@@ -6,7 +6,9 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "axios": "^0.21.1",
+    "decompress": "^4.2.1",
     "electron": "^13.1.7",
+    "hasha": "^5.2.2",
     "parcel": "^1.12.4",
     "tslib": "^2.3.0",
     "typescript": "^4.3.5",
@@ -16,6 +18,8 @@
     "vue-property-decorator": "^9.1.2"
   },
   "devDependencies": {
+    "@types/decompress": "^4.2.4",
+    "@types/node": "^16.4.2",
     "@vue/component-compiler-utils": "^3.2.2",
     "concurrently": "^6.2.0",
     "sass": "^1.36.0",

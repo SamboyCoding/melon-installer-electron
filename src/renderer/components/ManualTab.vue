@@ -13,9 +13,9 @@
             <span id="manual-zip-path">{{ zipPath ? zipPath : "Please select your MelonLoader Zip Archive..." }}</span>
         </div>
         <div class="row grow" id="install-buttons">
-            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall">RE-INSTALL</button>
-            <button class="install-button" v-if="alreadyInstalled" :disabled="!gamePath">UN-INSTALL</button>
-            <button class="install-button" v-if="!alreadyInstalled" :disabled="cannotInstall">INSTALL</button>
+            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall" @click="install()">RE-INSTALL</button>
+            <button class="install-button" v-if="alreadyInstalled" :disabled="!gamePath || currentlyInstalling" @click="uninstall()">UN-INSTALL</button>
+            <button class="install-button" v-if="!alreadyInstalled" :disabled="cannotInstall" @click="install()">INSTALL</button>
         </div>
     </div>
 </template>
@@ -35,6 +35,8 @@ export default class ManualTab extends Vue {
     public zipPath?: string = null;
     public alreadyInstalled: boolean = false;
 
+    public currentlyInstalling: boolean = false;
+
     public mounted() {
         IPC.onGamePathChanged = (newPath, newAlreadyInstalled, _) => {
             console.info(`[Manual] Received new game path ${newPath}, is installed: ${newAlreadyInstalled}`);
@@ -48,6 +50,20 @@ export default class ManualTab extends Vue {
             console.info(`[Manual] Received new Zip path ${newPath}`);
             this.zipPath = newPath;
         }
+
+        IPC.onInstallComplete = () => {
+            alert("INSTALL was successful!");
+            this.alreadyInstalled = true;
+            this.currentlyInstalling = false;
+
+            if(this.config.CloseAfterCompletion)
+                window.close();
+        };
+
+        IPC.onUninstallComplete = () => {
+            this.alreadyInstalled = false;
+            alert("UNINSTALL was successful!");
+        };
     }
 
     public doSelectGamePath() {
@@ -58,8 +74,17 @@ export default class ManualTab extends Vue {
         IPC.browseForZipArchive();
     }
 
+    public install() {
+        this.currentlyInstalling = true;
+        IPC.installManual(this.gamePath, this.zipPath);
+    }
+
+    public uninstall() {
+        IPC.uninstall(this.gamePath);
+    }
+
     get cannotInstall(): boolean {
-        return !this.gamePath || !this.zipPath;
+        return !this.gamePath || !this.zipPath || this.currentlyInstalling;
     }
 
     private modifyAndSaveConfig(modifier: (config: InstallerConfig) => void) {
@@ -98,7 +123,7 @@ export default class ManualTab extends Vue {
     #install-buttons {
         position: relative;
         border-top: 1px solid #777;
-        width: 95%;
+        width: 100%;
         padding-top: 0.5rem;
         margin: 16px auto 0;
         flex-grow: 1;
@@ -106,7 +131,7 @@ export default class ManualTab extends Vue {
         button {
             height: 100%;
 
-            & {
+            &:not(:last-of-type) {
                 margin-right: 6px;
             }
         }

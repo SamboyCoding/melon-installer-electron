@@ -1,13 +1,7 @@
 <template>
     <div id="tab-bar">
-        <div id="tab-automated" :class="{selected: selectedTab === 'auto'}" @click="setTab('auto')">
-            Automated
-        </div>
-        <div id="tab-manual" :class="{selected: selectedTab === 'manual'}"  @click="setTab('manual')">
-            Manual Zip
-        </div>
-        <div id="tab-settings" :class="{selected: selectedTab === 'settings'}"  @click="setTab('settings')">
-            Settings
+        <div v-for="(displayName, key) in tabs" :id="'tab-' + key" :class="{selected: selectedTab === key}" @click="setTab(key)">
+            {{ displayName }}
         </div>
     </div>
 </template>
@@ -21,6 +15,13 @@ export default class TabBar extends Vue {
         type: () => String
     })
     public selectedTab: string;
+
+    public tabs = {
+        auto: "Automated",
+        manual: "Manual Zip",
+        settings: "Settings",
+        // dev: "Dev"
+    }
 
     public setTab(name: string) {
         this.$emit("setTab", name);
