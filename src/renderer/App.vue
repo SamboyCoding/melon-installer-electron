@@ -6,7 +6,7 @@
         <div id="main-content">
             <tab-bar :selected-tab="selectedTab" @setTab="selectedTab = $event"></tab-bar>
             <div id="tab-content-wrapper">
-                <component :is="selectedTab + '-tab'"></component>
+                <component :is="selectedTab + '-tab'" :config="config"></component>
             </div>
         </div>
     </div>
@@ -19,12 +19,22 @@ import WindowBar from "./components/WindowBar.vue";
 import AutoTab from "./components/AutoTab.vue";
 import SettingsTab from "./components/SettingsTab.vue";
 import ManualTab from "./components/ManualTab.vue";
+import IPC from "./IPC";
+import InstallerConfig from "../common/InstallerConfig";
 
 @Component({
     components: {WindowBar, TabBar, AutoTab, ManualTab, SettingsTab},
 })
 export default class App extends Vue {
     public selectedTab = 'auto';
+    public config: InstallerConfig = null;
+
+    public mounted() {
+        IPC.onConfigUpdated = config => {
+            console.info("Got config", config);
+            this.config = config;
+        };
+    }
 }
 </script>
 
@@ -75,5 +85,33 @@ html, body, #app {
             }
         }
     }
+}
+
+button {
+    background: #222;
+    color: #ccc;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+
+    &:not([disabled]):hover {
+        background: #aaa;
+        color: black;
+    }
+
+    &[disabled] {
+        cursor: not-allowed;
+        background: #555;
+        color: #777;
+    }
+}
+
+select {
+    outline: none;
+    border: none;
+    margin-left: 4px;
+    padding: 4px 2px;
+    color: #333;
 }
 </style>

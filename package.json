@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "axios": "^0.21.1",
     "electron": "^13.1.7",
     "parcel": "^1.12.4",

@@ -8,8 +8,11 @@
         <br>
         <div class="row">
             <span>Version:</span>
-            <select :disabled="useLatest" style="width: 100px" v-model="selectedVersion">
-                <option v-for="version in mlVersions">{{version.tag_name}}</option>
+            <select disabled v-if="!mlVersions.length" style="width: 100px">
+                <option>Loading...</option>
+            </select>
+            <select v-else :disabled="useLatest" style="width: 100px" v-model="selectedVersion">
+                <option v-for="version in mlVersions">{{ version.tag_name }}</option>
             </select>
             <custom-checkbox :checked="useLatest" label="Latest" @toggled="toggleUseLatest()"></custom-checkbox>
         </div>
@@ -23,25 +26,29 @@
             <custom-checkbox :checked="useAutoArch" label="Auto-Detect" @toggled="toggleAutoArch()"></custom-checkbox>
         </div>
         <div class="row grow" id="install-buttons">
-            <button class="install-button" v-if="alreadyInstalled">UPDATE</button>
-            <button class="install-button" v-if="alreadyInstalled">UN-INSTALL</button>
-            <button class="install-button" v-if="!alreadyInstalled">INSTALL</button>
+            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall">UPDATE</button>
+            <button class="install-button" v-if="alreadyInstalled" :disabled="cannotInstall">UN-INSTALL</button>
+            <button class="install-button" v-if="!alreadyInstalled" :disabled="cannotInstall">INSTALL</button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import {Vue, Component} from 'vue-property-decorator'
+import {Vue, Component, Prop} from 'vue-property-decorator'
 import CustomCheckbox from "./CustomCheckbox.vue";
 import IPC from "../IPC";
 import axios from "axios";
+import InstallerConfig from "../../common/InstallerConfig";
 
 @Component({
     components: {CustomCheckbox}
 })
 export default class AutoTab extends Vue {
+    @Prop({
+    })
+    public config: InstallerConfig;
+
     //UI Props
-    public showPreRelease: boolean = false;
     public useLatest: boolean = true;
     public useAutoArch: boolean = true;
     public selectedArch: string = "x64";
@@ -61,17 +68,22 @@ export default class AutoTab extends Vue {
             this.gamePath = newPath;
             this.alreadyInstalled = newAlreadyInstalled;
             this.gameIs64Bit = arch == "x64";
+
+            this.modifyAndSaveConfig(config => config.LastSelectedGamePath = this.gamePath);
         }
 
+        return;
+
         try {
-            const response = await axios.get("https://api.github.com/repos/lavagang/melonloader/releases");
+            const response = await axios.get(`https://api.github.com/repos/lavagang/melonloader/releases?${Date.now()}`);
             let versions = response.data as any[];
 
             if (!this.showPreRelease)
                 versions = versions.filter(v => v.prerelease === false);
 
             this.mlVersions = versions;
-        } catch(e) {
+            this.selectedVersion = this.mlVersions[0].tag_name;
+        } catch (e) {
             alert("Failed to get list of releases! " + e);
         }
     }
@@ -83,15 +95,23 @@ export default class AutoTab extends Vue {
     public toggleAutoArch() {
         this.useAutoArch = !this.useAutoArch;
 
-        if(this.useAutoArch)
+        if (this.useAutoArch)
             this.selectedArch = this.gameIs64Bit ? "x64" : "x86";
     }
 
     public toggleUseLatest() {
         this.useLatest = !this.useLatest;
 
-        if(this.useLatest)
-            this.selectedVersion = this.mlVersions[0];
+        if (this.useLatest)
+            this.selectedVersion = this.mlVersions[0].tag_name;
+    }
+
+    get cannotInstall(): boolean {
+        return !this.gamePath;
+    }
+
+    private modifyAndSaveConfig(modifier: (config: InstallerConfig) => void) {
+        IPC.changeAndSaveConfig(modifier, this.config);
     }
 }
 </script>
@@ -139,20 +159,6 @@ export default class AutoTab extends Vue {
         }
     }
 
-    button {
-        background: #222;
-        color: #ccc;
-        border: 1px solid #555;
-        cursor: pointer;
-        font-size: 11px;
-        font-weight: bold;
-
-        &:hover {
-            background: #aaa;
-            color: black;
-        }
-    }
-
     #select-button {
         margin: 0 8px;
         padding: 2px 10px;
@@ -165,12 +171,6 @@ export default class AutoTab extends Vue {
         align-self: center;
     }
 
-    select {
-        outline: none;
-        border: none;
-        margin-left: 4px;
-        padding: 4px 2px;
-        color: #333;
-    }
+
 }
 </style>

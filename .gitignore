@@ -2,3 +2,5 @@
 /.cache/
 /.idea/
 /webContents/
+
+src/**/*.js*
