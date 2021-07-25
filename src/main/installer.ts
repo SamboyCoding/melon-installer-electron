@@ -52,7 +52,7 @@ export default class Installer {
     }
 
     public static async validateSha512(localPath: string, sha512: string): Promise<boolean> {
-        const actualHash = (await hasha.fromFile(localPath, {algorithm: "sha512"})).toUpperCase();
+        const actualHash = hasha.fromFileSync(localPath, {algorithm: "sha512"}).toUpperCase();
 
         console.log(`[Installer] Calculated SHA512 of ${localPath}. Expecting ${sha512}, got ${actualHash}`);
 

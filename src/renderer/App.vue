@@ -4,7 +4,7 @@
         <img src="assets/ML_Logo.png" id="ml-logo" alt="MelonLoader Logo">
         <img src="assets/ML_Text.png" id="ml-text" alt="MelonLoader Text">
         <div id="main-content">
-            <tab-bar :selected-tab="selectedTab" @setTab="selectedTab = $event"></tab-bar>
+            <tab-bar :selected-tab="selectedTab" @set-tab="selectedTab = $event"></tab-bar>
             <div id="tab-content-wrapper">
                 <component :is="selectedTab + '-tab'" :config="config"></component>
             </div>

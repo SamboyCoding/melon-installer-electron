@@ -4,12 +4,17 @@ import TOML, {AnyJson} from "@iarna/toml";
 import InstallerConfig from "../common/InstallerConfig";
 import Installer from "./installer";
 import {promises} from "fs";
+import isDev from "electron-is-dev";
 
 const {stat, readFile, writeFile, mkdtemp, rm} = promises;
 
 let win: BrowserWindow;
 const rootPath = process.env.APPDATA || process.env.HOME;
 const configFilePath = join(rootPath, "MelonLoader.Installer.cfg");
+
+process.on("uncaughtException", error => {
+    console.error("[Unhandled Exception]", error);
+});
 
 const defaultConfig: InstallerConfig = {
     LastSelectedGamePath: "",
@@ -42,7 +47,10 @@ async function createWindow() {
 
     console.log("[CreateWindow] Loading file...");
 
-    await win.loadFile("../../webContents/index.html")
+    if(isDev)
+        await win.loadFile("../../webContents/index.html")
+    else
+        await win.loadFile("webContents/index.html");
 
     console.log("[CreateWindow] Done.");
 }

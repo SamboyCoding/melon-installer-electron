@@ -10,6 +10,7 @@
         "sourceMap": true,
         "strict": false,
         "importHelpers": true,
+        "outDir": "../../build/",
         "esModuleInterop": true,
         "noImplicitThis": true,
         "experimentalDecorators": true

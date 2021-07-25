@@ -2,23 +2,17 @@ import {ipcRenderer, IpcRendererEvent} from "electron";
 import InstallerConfig from "../common/InstallerConfig";
 
 export default class IPC {
-    public static onGamePathChanged: (path: string, alreadyInstalled: boolean, arch: string) => void
-        = () => null;
+    public static onGamePathChanged: (path: string, alreadyInstalled: boolean, arch: string) => void;
 
-    public static onZipPathChanged: (path: string) => void
-        = () => null;
+    public static onZipPathChanged: (path: string) => void = () => null;
 
-    public static onConfigUpdated: (config: InstallerConfig) => void
-        = () => null;
+    public static onConfigUpdated: (config: InstallerConfig) => void = () => null;
 
-    public static onAutoInstallDownloadPercent: (percent: number) => void
-        = () => null;
+    public static onAutoInstallDownloadPercent: (percent: number) => void = () => null;
 
-    public static onInstallComplete: () => void
-        = () => null;
+    public static onInstallComplete: () => void = () => null;
 
-    public static onUninstallComplete: () => void
-        = () => null;
+    public static onUninstallComplete: () => void = () => null;
 
     public static browseForGamePath() {
         ipcRenderer.send("browse-game-path");

@@ -24,7 +24,7 @@ export default class TabBar extends Vue {
     }
 
     public setTab(name: string) {
-        this.$emit("setTab", name);
+        this.$emit("set-tab", name);
     }
 }
 </script>

@@ -1,15 +1,18 @@
 {
   "name": "melon-installer-electron",
+  "description": "Electron-based installer for MelonLoader",
+  "author": {
+    "name": "Samboy063"
+  },
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "build/main/index.js",
   "license": "MIT",
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "axios": "^0.21.1",
     "decompress": "^4.2.1",
-    "electron": "^13.1.7",
+    "electron-is-dev": "^2.0.0",
     "hasha": "^5.2.2",
-    "parcel": "^1.12.4",
     "tslib": "^2.3.0",
     "typescript": "^4.3.5",
     "vue": "^2.6.14",
@@ -17,11 +20,24 @@
     "vue-hot-reload-api": "^2.3.4",
     "vue-property-decorator": "^9.1.2"
   },
+  "build": {
+    "files": [
+      "build/**",
+      "webContents/**"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "app.ico"
+    }
+  },
   "devDependencies": {
     "@types/decompress": "^4.2.4",
     "@types/node": "^16.4.2",
     "@vue/component-compiler-utils": "^3.2.2",
     "concurrently": "^6.2.0",
+    "electron": "^13.1.7",
+    "electron-builder": "^22.11.7",
+    "parcel": "1.10.3",
     "sass": "^1.36.0",
     "vue-template-compiler": "^2.6.14"
   },
@@ -30,10 +46,11 @@
     "watch-renderer": "parcel src/renderer/index.html --target=electron \"--public-url=.\" --out-dir webContents",
     "watch": "concurrently \"npm:watch-*\"",
     "build-typescript": "tsc -p src/main/tsconfig.json",
-    "build-renderer": "parcel build src/renderer/index.html --target=electron \"--public-url=.\" --out-dir webContents --experimental-scope-hoisting",
+    "build-renderer": "parcel build src/renderer/index.html --target=electron \"--public-url=.\" --out-dir webContents",
     "build-all": "yarn build-typescript && yarn build-renderer",
     "start": "yarn build-all && electron . --enable-sandbox",
-    "start-dev": "electron --inspect=5858 ./src/main",
-    "release": "yarn build-all && electron-builder"
+    "start-dev": "electron --inspect=5858 ./build/main",
+    "release": "yarn build-typescript && electron-builder",
+    "eb": "electron-builder"
   }
 }
