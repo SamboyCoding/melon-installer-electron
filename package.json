@@ -1,0 +1,34 @@
+{
+  "name": "melon-installer-electron",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "electron": "^13.1.7",
+    "parcel": "^1.12.4",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5",
+    "vue": "^2.6.14",
+    "vue-class-component": "^7.2.6",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-property-decorator": "^9.1.2"
+  },
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^3.2.2",
+    "concurrently": "^6.2.0",
+    "sass": "^1.36.0",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "scripts": {
+    "watch-typescript": "tsc -p src/main/tsconfig.json --watch",
+    "watch-renderer": "parcel src/renderer/index.html --target=electron \"--public-url=.\" --out-dir webContents",
+    "watch": "concurrently \"npm:watch-*\"",
+    "build-typescript": "tsc -p src/main/tsconfig.json",
+    "build-renderer": "parcel build src/renderer/index.html --target=electron \"--public-url=.\" --out-dir webContents --experimental-scope-hoisting",
+    "build-all": "yarn build-typescript && yarn build-renderer",
+    "start": "yarn build-all && electron . --enable-sandbox",
+    "start-dev": "electron --inspect=5858 ./src/main",
+    "release": "yarn build-all && electron-builder"
+  }
+}

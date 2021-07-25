@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ES2018",
+            "DOM"
+        ],
+        "module": "none",
+        "target": "esnext",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "strict": false,
+        "importHelpers": true,
+        "esModuleInterop": true,
+        "noImplicitThis": true,
+        "experimentalDecorators": true
+    },
+    "exclude": [
+        "../../node_modules"
+    ]
+}
